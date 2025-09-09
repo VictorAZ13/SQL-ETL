@@ -1,0 +1,42 @@
+# Archivos del sistema
+*.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Entornos virtuales
+.env
+.venv/
+env/
+venv/
+
+# Archivos de configuración locales
+*.log
+*.ini
+*.cfg
+*.json
+
+# Datos generados
+/datasets/*
+!/datasets/.gitkeep   # Mantener la carpeta vacía en el repo
+/sql/*
+!/sql/.gitkeep
+/exports/*
+!/exports/.gitkeep
+
+# Archivos de Jupyter (por si acaso)
+.ipynb_checkpoints/
+
+# Archivos de Excel temporales
+~$*.xlsx
+
