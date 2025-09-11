@@ -36,7 +36,12 @@ exports/ "se añadirá mas tarde"
 - **Día 1**: Setup de proyecto, importación de dataset y primeras consultas SQL.  
   - SELECT, WHERE, ORDER BY, LIMIT.  
   - Primer commit del repo.
-
+- **Día 2**: Funciones de agregación y agrupación (SQL)
+  - Practiqué funciones de agregación: `COUNT`, `MIN`, `MAX`, `AVG`, `SUM`.
+  - Aprendí a usar `GROUP BY` para resumir datos categóricos (género, curso, departamento).
+  - Usé `HAVING` para filtrar resultados después de agrupar.
+  - Combiné `GROUP BY + HAVING + ORDER BY` para generar rankings (ej. curso con más alumnos, departamento con mejor promedio).
+  - Reto resuelto: encontrar el departamento con mejor promedio de calificación entre los que tienen más de 8 alumnos.
 ---
 
 ## 📌 Próximos pasos

@@ -1,0 +1,41 @@
+id,nombre,edad,genero,curso,departamento,calificacion,grado
+1,Yeny,19,F,Data Science,Administración de Negocios,13,Master
+2,Nieves,19,F,Fisica,Ciencas de la Computación,11,Doctor
+3,Yeny,27,M,Fisica,Arquitectura,9,Master
+4,Jose,29,M,Fisica,Ingeniería Económica,7,Estudiante
+5,Cesar,27,M,Fisica,Ciencas de la Computación,10,Doctor
+6,Victor,19,F,Fisica,Ingeniería Económica,18,Estudiante
+7,Jose,25,F,Matematicas,Ciencas de la Computación,11,Master
+8,Flavia,22,M,Data Science,Ingenieria Industrial,0,Master
+9,Victor,19,F,Fisica,Ingeniería Económica,8,Estudiante
+10,Yeny,26,M,Data Science,Ciencas de la Computación,17,Doctor
+11,Juan,25,M,Data Science,Ingenieria Industrial,5,Estudiante
+12,Juan,21,F,Diplomado de ML,Ciencas de la Computación,1,Egresado
+13,Nieves,28,M,Data Science,Administración de Negocios,4,Master
+14,Cesar,18,M,Data Science,Arquitectura,15,Estudiante
+15,Diana,18,F,Matematicas,Ingeniería Económica,9,Master
+16,Flavia,30,M,Diplomado Estadistica,Ingenieria Industrial,7,Estudiante
+17,Oscar,28,F,Matematicas,Administración de Negocios,9,Egresado
+18,Victor,26,M,Fisica,Ingenieria Industrial,7,Doctor
+19,Cesar,22,M,Fisica,Ingenieria Industrial,7,Master
+20,Diana,21,M,Data Science,Ingenieria Industrial,14,Doctor
+21,Yeny,26,F,Diplomado de ML,Ingenieria Industrial,18,Master
+22,Flavia,20,M,Diplomado Estadistica,Ingeniería Económica,13,Master
+23,Victor,30,F,Fisica,Ciencas de la Computación,10,Estudiante
+24,Nieves,22,F,Data Science,Administración de Negocios,13,Estudiante
+25,Cesar,23,F,Fisica,Administración de Negocios,20,Estudiante
+26,Nieves,28,F,Diplomado Estadistica,Administración de Negocios,4,Doctor
+27,Yeny,20,M,Data Science,Ciencas de la Computación,17,Estudiante
+28,Juan,30,F,Diplomado de ML,Ingeniería Económica,20,Estudiante
+29,Diana,28,F,Fisica,Ingenieria Industrial,4,Doctor
+30,Juan,19,M,Fisica,Ciencas de la Computación,2,Doctor
+31,Cesar,25,M,Fisica,Ingeniería Económica,10,Master
+32,Flavia,22,F,Matematicas,Ingenieria Industrial,19,Doctor
+33,Jose,29,F,Matematicas,Ingenieria Industrial,4,Doctor
+34,Diana,25,F,Fisica,Ingeniería Económica,9,Egresado
+35,Victor,21,M,Fisica,Ingenieria Industrial,0,Doctor
+36,Yeny,19,F,Fisica,Administración de Negocios,6,Egresado
+37,Cesar,29,F,Matematicas,Ingenieria Industrial,14,Egresado
+38,Nieves,21,M,Diplomado de ML,Administración de Negocios,16,Doctor
+39,Yeny,19,F,Matematicas,Ingenieria Industrial,10,Doctor
+40,Jose,26,M,Fisica,Ingenieria Industrial,15,Master
