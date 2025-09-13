@@ -1,28 +1,40 @@
 import csv
 import random
+import os
 
-columnas = ["id","nombre","edad","genero","curso","departamento","calificacion","grado"]
 
-nombres = ["Victor","Oscar","Flavia","Yeny","Juan","Nieves","Diana","Jose","Cesar"]
-generos = ["M","F"]
-cursos = ["Fisica","Matematicas","Diplomado de ML","Diplomado Estadistica","Data Science"]
-departamentos = ["Ingenieria Industrial","Arquitectura","Ciencas de la Computación","Ingeniería Económica","Administración de Negocios"]
-grados = ["Egresado","Estudiante","Master","Doctor"]
+os.makedirs("datasets", exist_ok=True)
 
-with open("estudiantes.csv","w",newline="",encoding="utf-8") as archivo:
-    writer = csv.writer(archivo)
-    writer.writerow(columnas)
+nombres_estudiantes = ["Victor","Oscar","Flavia","Yeny","Juan","Nieves","Diana","Jose","Cesar"]
+nombres_profesores = ["Perez","Gomez","Lopez","Torres","Fernandez","Salas","Ramos","Cruz","Castro"]
+departamentos = ["Ingeniería Industrial","Arquitectura","Ciencias de la Computación",
+                 "Ingeniería Económica","Administración de Negocios"]
+cursos = ["Física","Matemáticas","Diplomado ML","Diplomado Estadística","Data Science"]
 
-    for i in range(1,41):
-        fila = [
+# --- Profesores.csv ---
+with open("datasets/profesores.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerow(["id","nombre_profesor","departamento"])
+    for i in range(1, len(nombres_profesores)+1):
+        writer.writerow([i, nombres_profesores[i-1], random.choice(departamentos)])
+
+# --- Cursos.csv ---
+with open("datasets/cursos.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerow(["id","nombre_curso","profesor_id"])
+    for i in range(1, len(cursos)+1):
+        writer.writerow([i, cursos[i-1], random.randint(1, len(nombres_profesores))])
+
+# --- Estudiantes.csv ---
+with open("datasets/estudiantes.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerow(["id","nombre","edad","genero","curso_id","nota"])
+    for i in range(1, 41):  # 40 estudiantes
+        writer.writerow([
             i,
-            random.choice(nombres),
+            random.choice(nombres_estudiantes),
             random.randint(17,30),
-            random.choice(generos),
-            random.choice(cursos),
-            random.choice(departamentos),
-            random.randint(0,20),
-            random.choice(grados)
-        ]
-        writer.writerow(fila)
-
+            random.choice(["M","F"]),
+            random.randint(1, len(cursos)),  # curso_id FK
+            random.randint(0,20)
+        ])
