@@ -1,0 +1,143 @@
+[
+  {
+    "QUERY PLAN": "Sort  (cost=27.68..27.78 rows=40 width=416) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "  Sort Key: c.nombre_curso"
+  },
+  {
+    "QUERY PLAN": "  Sort Method: quicksort  Memory: 29kB"
+  },
+  {
+    "QUERY PLAN": "  Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "  ->  WindowAgg  (cost=26.02..26.62 rows=40 width=416) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "        Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "        ->  WindowAgg  (cost=26.00..26.02 rows=40 width=408) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "              Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "              ->  Sort  (cost=25.32..25.42 rows=40 width=400) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                    Sort Key: e.nota"
+  },
+  {
+    "QUERY PLAN": "                    Sort Method: quicksort  Memory: 28kB"
+  },
+  {
+    "QUERY PLAN": "                    Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                    ->  WindowAgg  (cost=23.65..24.25 rows=40 width=400) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                          Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                          ->  WindowAgg  (cost=23.64..23.65 rows=40 width=392) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                                ->  Sort  (cost=22.95..23.05 rows=40 width=384) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                      Sort Key: e.nota DESC"
+  },
+  {
+    "QUERY PLAN": "                                      Sort Method: quicksort  Memory: 27kB"
+  },
+  {
+    "QUERY PLAN": "                                      Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                                      ->  WindowAgg  (cost=18.62..21.89 rows=40 width=384) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                            Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                                            ->  Incremental Sort  (cost=18.62..21.19 rows=40 width=376) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                                  Sort Key: e.curso_id, e.nota"
+  },
+  {
+    "QUERY PLAN": "                                                  Presorted Key: e.curso_id"
+  },
+  {
+    "QUERY PLAN": "                                                  Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB"
+  },
+  {
+    "QUERY PLAN": "                                                  Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                                                  ->  WindowAgg  (cost=18.59..19.39 rows=40 width=376) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                                        Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                                                        ->  Sort  (cost=18.59..18.69 rows=40 width=368) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                                              Sort Key: e.curso_id, e.nota DESC"
+  },
+  {
+    "QUERY PLAN": "                                                              Sort Method: quicksort  Memory: 26kB"
+  },
+  {
+    "QUERY PLAN": "                                                              Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                                                              ->  Hash Right Join  (cost=1.90..17.52 rows=40 width=368) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                                                    Hash Cond: (c.id = e.curso_id)"
+  },
+  {
+    "QUERY PLAN": "                                                                    Buffers: shared hit=2"
+  },
+  {
+    "QUERY PLAN": "                                                                    ->  Seq Scan on cursos c  (cost=0.00..13.80 rows=380 width=182) (actual rows=5 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                                                          Buffers: shared hit=1"
+  },
+  {
+    "QUERY PLAN": "                                                                    ->  Hash  (cost=1.40..1.40 rows=40 width=190) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                                                          Buckets: 1024  Batches: 1  Memory Usage: 11kB"
+  },
+  {
+    "QUERY PLAN": "                                                                          Buffers: shared hit=1"
+  },
+  {
+    "QUERY PLAN": "                                                                          ->  Seq Scan on estudiantes e  (cost=0.00..1.40 rows=40 width=190) (actual rows=40 loops=1)"
+  },
+  {
+    "QUERY PLAN": "                                                                                Buffers: shared hit=1"
+  },
+  {
+    "QUERY PLAN": "Planning:"
+  },
+  {
+    "QUERY PLAN": "  Buffers: shared hit=6 read=1"
+  },
+  {
+    "QUERY PLAN": "Planning Time: 0.613 ms"
+  },
+  {
+    "QUERY PLAN": "Execution Time: 0.266 ms"
+  }
+]

@@ -24,13 +24,16 @@ venv/
 *.log
 *.ini
 *.cfg
+# Mantener JSON locales de config ignorados,
+# pero permitir los de docs/perf/
 *.json
+!perf/*.json
 
 # Datos generados
 /datasets/*
 !/datasets/.gitkeep   # Mantener la carpeta vacía en el repo
-/sql/*
-!/sql/.gitkeep
+
+# Mantener la carpeta exports vacía
 /exports/*
 !/exports/.gitkeep
 
@@ -39,4 +42,3 @@ venv/
 
 # Archivos de Excel temporales
 ~$*.xlsx
-
