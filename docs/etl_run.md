@@ -1,0 +1,31 @@
+# ETL Runbook
+
+## Inventario de esquema (borrador)
+- Tablas: …
+- Vistas/MV: …
+- Triggers: …
+- Constraints pendientes de VALIDATE: …
+
+## Brechas
+- …
+
+## Resultados de VALIDATE (D1 - placeholder)
+- `ALTER TABLE … VALIDATE CONSTRAINT …`: pendiente de ejecución (D2)
+
+## Resultados de checks (D1 - tabla vacía)
+| métrica | severidad | esperado | observado | status |
+|--------|-----------|----------|-----------|--------|
+| nulos_críticos_alumnos | bloqueante | 0 | - | pendiente |
+| duplicados_por_DNI | bloqueante | 0 | - | pendiente |
+| fks_huérfanas | bloqueante | 0 | - | pendiente |
+| notas_fuera_rango | warning | 0 | - | pendiente |
+| delta_staging_vs_destino | bloqueante | 0 | - | pendiente |
+
+## Evidencias del run
+- (D1: capturas/listados de estructura, encabezados SQL)
+
+## Bitácora (D1)
+- Logros:
+- Dificultades/Bloqueos:
+- Observaciones/Decisiones:
+- Evidencias adjuntas:

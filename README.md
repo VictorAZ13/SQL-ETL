@@ -2,37 +2,48 @@
 
 En este repositorio fue creado con el propósito de aprender acerca de pipeline en ambitos aplicados, partiendo de la idea de la transformación y el guardado de csv o excel a base de datos sql que podran ser consultados y tratados para **reportes o BI**.
 
+
+## Arquitectura (borrador)
+- Capas: **staging** → **core** → **vistas/MV**
+- Orquestación: **Python app-céntrico (por decidir)** (DDL fuera de alcance del orquestador)
+- Logs: tabla `etl_logs` (conteos, status, timings, error_msg)
+
+## 🔧 Requisitos
+- Python 3.11+  
+- PostgreSQL 14+  
+- DBeaver (cliente gráfico para SQL **opcional**)  
+- VS Code (editor personal recomendado)  
+
+---
+
+## Pasos de ejecución (borrador)
+1) Pre-checks de calidad (SQL)
+2) Carga: `CALL sp_etl_run(...);` (wrapper thin) o pasos app-céntricos
+3) Post-checks, export a `/exports`, refresh de vistas/
+
+---
+## 📌 Próximos pasos
+- Poyecto SQL <-> Orquestador (Python)
+
+---
+## Avances del proyecto
+ **Dia 1**: 
+- [ ] Estructura creada
+- [ ] Plantilla `docs/etl_run.md`
+- [ ] Encabezados en `sql/*.sql`
+- [ ] 1er commit “init scaffolding”
+
+---
+
 ##  Objetivos de aprendizaje
 - Practicar consultas SQL básicas (SELECT, WHERE, ORDER BY, LIMIT, etc.).
 - Integrar Python con PostgreSQL para construir un pipeline ETL.
 - Preparar la base para análisis y visualización de datos.
 - Aprender buenas prácticas de versionado y organización de proyectos.
 
-
-## Estructura del proyecto
-
-datasets/
-etl/
-sql/
-exports/ "se añadirá mas tarde"
-
-## 🔧 Requisitos
-- Python 3.10+  
-- PostgreSQL 14+  
-- DBeaver (cliente gráfico para SQL)  
-- VS Code (editor recomendado)  
-
 ---
 
-## ▶️ Uso básico
-1. Crear la base de datos `school_db` en PostgreSQL.  
-2. Importar dataset de ejemplo (`datasets/students.csv`).  
-3. Ejecutar las consultas de `sql/01-select-queries.sql` en DBeaver.  
-4. (Más adelante) correr scripts de `/etl` para automatizar el pipeline.
-
----
-
-## 📚 Avances
+## 📚 Avances de conocimiento
 - **Día 1**: Setup de proyecto, importación de dataset y primeras consultas SQL.  
   - SELECT, WHERE, ORDER BY, LIMIT.  
   - Primer commit del repo.
@@ -96,33 +107,3 @@ exports/ "se añadirá mas tarde"
   - Introducción al análisis de performance con `EXPLAIN` y `EXPLAIN ANALYZE`.  
   - Creé un índice (`curso_id, nota DESC`) y observé cómo optimiza el plan, cambiando de **Sort completo** a **Incremental Sort**.  
   - Guardé planes de ejecución en JSON (`perf/`) y documenté notas en el README.  
-
-Consultas iniciales:
-
-Estudiantes con cursos (INNER JOIN).
-Estudiantes sin curso (LEFT JOIN).
-Cursos sin profesor (LEFT JOIN).
-Profesores sin curso (LEFT JOIN + filtro).
-Mini-proyecto: unir estudiantes, cursos y profesores con 2 JOINS encadenados.
-
-Reto práctico: ranking de profesores con más alumnos asignados.
-
-Aprendizajes clave
-
-  - LEFT JOIN es el más útil en reporting, muy similar a merge de pandas (how="left") o BUSCARV de Excel.
-
-  - INNER JOIN asegura consistencia de datos, útil para limpieza y control de calidad.
-
-  - RIGHT JOIN / FULL OUTER JOIN tienen menos uso en la práctica y suelen reemplazarse con subconsultas o uniones cuando el motor (ej. SQLite) no los soporta nativamente.
-
-**Importancia de usar alias, AS para legibilidad, y GROUP BY para agregaciones claras.**
-
-El dataset actual restringe a un curso por profesor → detectamos limitación y aprendimos cómo impacta en los resultados.
----
-
-## 📌 Próximos pasos
-- Profundizar en índices y query tuning con `EXPLAIN`.
-- Implementar funciones/procedimientos en PostgreSQL.
-- Crear trigger simple de auditoría.
-- Primer script ETL en Python (`etl/pipeline.py`).
-- Configurar exportaciones en `/exports`.
