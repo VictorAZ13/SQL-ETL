@@ -29,3 +29,10 @@
 - Dificultades/Bloqueos:
 - Observaciones/Decisiones:
 - Evidencias adjuntas:
+| paso | archivo                             | depende de            |
+| ---- | ----------------------------------- | --------------------- |
+| 1    | sql/constraints.sql                 | DDL tablas            |
+| 2    | sql/triggers.sql                    | constraints           |
+| 3    | sql/procedimientos.sql              | constraints, triggers |
+| 4    | sql/etl\_quality\_checks.sql (pre)  | staging listo         |
+| 5    | sql/etl\_quality\_checks.sql (post) | carga realizada       |

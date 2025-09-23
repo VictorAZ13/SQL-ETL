@@ -1,0 +1,6 @@
+-- FILE: etl_quality_checks.sql
+-- INTENT: Especificación de checks pre/post (conteos = 0 → OK).
+-- PRE: nulos críticos, duplicados por DNI, FKs huérfanas, rangos/dominios.
+-- POST: conteos staging/destino, delta, revalidación FK, drift simple.
+-- SEVERIDAD: bloqueante | warning (gates de calidad).
+-- RUN_ORDER: 30
