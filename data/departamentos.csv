@@ -1,0 +1,6 @@
+id,nombre,parent_id
+1,Ingeniería Industrial,5
+2,Arquitectura,NULL
+3,Ciencias de la Computación,1
+4,Ingeniería Económica,1
+5,Administración de Negocios,NULL
