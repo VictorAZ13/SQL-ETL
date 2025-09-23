@@ -36,3 +36,23 @@
 | 3    | sql/procedimientos.sql              | constraints, triggers |
 | 4    | sql/etl\_quality\_checks.sql (pre)  | staging listo         |
 | 5    | sql/etl\_quality\_checks.sql (post) | carga realizada       |
+
+## Casos borde (Dataset sintético D1)
+| caso                                  | qty | check que dispara                 | severidad     |
+|---------------------------------------|----:|-----------------------------------|---------------|
+| DNI nulo                              |  2 | dq_pre_nulos_criticos_alumnos     | bloqueante    |
+| Nombre/Apellido nulo                  |  3 | dq_pre_nulos_criticos_alumnos     | bloqueante    |
+| DNI duplicado                         |  3 | dq_pre_duplicados_por_dni         | bloqueante    |
+| DNI formato inválido (no 8 dígitos)   |  3 | dq_pre_dni_formato_invalido       | bloqueante    |
+| Género fuera de dominio               |  2 | dq_pre_genero_fuera_dominio       | warning       |
+| Nota fuera de rango (<0 o >20)        |  4 | dq_pre_nota_fuera_rango           | bloqueante    |
+| FK departamento huérfana              |  2 | dq_pre_fk_departamento_huerfana   | bloqueante    |
+| Ruido de limpieza (espacios/case)     |  4 | (no bloquea; valida normalización)| warning       |
+
+**Totales sintéticos esperados (borrador):**
+- nulos_criticos_alumnos = 5
+- duplicados_por_dni = 3 (claves repetidas en grupos de 2+)
+- dni_formato_invalido = 3
+- genero_fuera_dominio = 2
+- nota_fuera_rango = 4
+- fk_departamento_huerfana = 2

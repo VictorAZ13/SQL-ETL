@@ -7,10 +7,14 @@
 --TRIGGER: cambio de fecha de actualización
 
 -- [GROUP] Auditoría (NO orquestación)
--- PRE: tablas audit_* existen
--- SOURCE: sql/others/.sql
+-- PRE: etl_demo.demo_estudiantes existen
+-- SOURCE: sql/others/query_dia9_3.sql
 -- SQL original ↓↓↓
 -- ...
+DROP TRIGGER IF EXISTS trg_set_updated_at ON etl_demo.demo_estudiantes;
+CREATE TRIGGER trg_set_updated_at
+BEFORE UPDATE ON etl_demo.demo_estudiantes
+FOR EACH ROW EXECUTE FUNCTION etl_demo.trg_set_updated_at();
 
 -- [GROUP] updated_at (independiente de auditoría)
 -- PRE: columna updated_at existe
@@ -24,11 +28,6 @@ BEGIN
     NEW.updated_at := now();
     RETURN NEW;
 END $$;
-
-DROP TRIGGER IF EXISTS trg_set_updated_at ON etl_demo.demo_estudiantes;
-CREATE TRIGGER trg_set_updated_at
-BEFORE UPDATE ON etl_demo.demo_estudiantes
-FOR EACH ROW EXECUTE FUNCTION etl_demo.trg_set_updated_at();
 
 --trigger inserción de tabla auditoria (que se modifico)
 CREATE OR REPLACE FUNCTION etl_demo.trg_audit_estudiantes()
