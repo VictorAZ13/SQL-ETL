@@ -3,10 +3,22 @@
 En este repositorio fue creado con el propósito de aprender acerca de pipeline en ambitos aplicados, partiendo de la idea de la transformación y el guardado de csv o excel a base de datos sql que podran ser consultados y tratados para **reportes o BI**.
 
 
-## Arquitectura (borrador)
-- Capas: **staging** → **core** → **vistas/MV**
-- Orquestación: **Python app-céntrico (por decidir)** (DDL fuera de alcance del orquestador)
-- Logs: tabla `etl_logs` (conteos, status, timings, error_msg)
+## Arquitectura (alto nivel)
+
+PostgreSQL (schema proyecto_etl) con SRP:
+DDL base: tablas 3FN para periodo, departamento, carrera, curso, profesor, estudiante, grupo, profesor_asignacion, matricula, calificacion.
+
+Constraints: BK/SK, FKs con acciones, CHECKs de dominio.
+
+Índices: por PK/UNIQUE y FKs; 1 índice KPI.
+
+Runbook (docs/etl_run.md): evidencias de validaciones y decisiones.
+
+ETL app-céntrico (D5–D7): Python orchestration (flags; pre/post-checks; logs).
+
+Capa de consulta (D6): 1 VIEW + 1 MV para KPIs; REFRESH controlado.
+
+Diagrama sugerido: fuentes (CSV) → staging → sp_cargar_* (UPSERT) → tablas destino → VIEW/MV → BI.
 
 ## 🔧 Requisitos
 - Python 3.11+  
@@ -28,10 +40,35 @@ En este repositorio fue creado con el propósito de aprender acerca de pipeline 
 ---
 ## Avances del proyecto
  **Dia 1**: 
-- [ ] Estructura creada
-- [ ] Plantilla `docs/etl_run.md`
-- [ ] Encabezados en `sql/*.sql`
+- [X] Estructura creada
+- [x] Plantilla `docs/etl_run.md`
+- [x] Encabezados en `sql/*.sql`
+- [x] 1er commit “init scaffolding”
+## Orquestador (app-céntrico) — Contrato
+Ver **docs/orchestrator_contract.md**.  
+No-alcance: el orquestador no ejecuta DDL (constraints/triggers/vistas); solo orquesta pre/post checks, llamadas SQL y exporta evidencias.
+
+---
+ **Dia 2**: 
+- [x] Claves BK compuestas
+- [x] FKs indices y constraints (Acciones referenciales)
+- [x] KPI escogido
 - [ ] 1er commit “init scaffolding”
+- [ ] 
+## Orquestador (app-céntrico) — Contrato
+Ver **docs/orchestrator_contract.md**.  
+No-alcance: el orquestador no ejecuta DDL (constraints/triggers/vistas); solo orquesta pre/post checks, llamadas SQL y exporta evidencias.
+
+
+## Plan de implementación
+
+D2: aplicar constraints (BK, FKs con acciones), CHECKs, índices; actualizar runbook.
+
+D3: preparar staging + pre-checks (nulos críticos, duplicados BK, FKs huérfanas por código, fuera de rango); remediar.
+
+D4: functions set-based + procedure orquestador SQL (cleanup→dedup→upsert→logs), triggers (auditoría/updated_at).
+
+D5–D7: orquestación Python (flags --dry-run, --truncate-staging, pre/post-checks, export a /exports), VIEW/MV KPIs, medición “antes/después”, README final.
 
 ---
 

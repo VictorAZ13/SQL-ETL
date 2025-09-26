@@ -29,6 +29,7 @@
 - Dificultades/Bloqueos:
 - Observaciones/Decisiones:
 - Evidencias adjuntas:
+  
 | paso | archivo                             | depende de            |
 | ---- | ----------------------------------- | --------------------- |
 | 1    | sql/constraints.sql                 | DDL tablas            |
@@ -66,7 +67,7 @@
 | curso                | curso\_id        | curso\_code                              | dept\_id → departamento                  | curso\_code, dept\_id, creditos     | CHECK créditos                              |
 | profesor             | profesor\_id     | profesor\_dni                            | –                                        | profesor\_dni, profesor\_name       | –                                           |
 | estudiante           | estudiante\_id   | estudiante\_dni                          | carr\_id → carrera                       | estudiante\_dni, carr\_id           | –                                           |
-| grupo                | grupo\_id        | grupo\_code                              | periodo\_id → periodo; curso\_id → curso | grupo\_code, periodo\_id, curso\_id | CHECK capacidad                             |
+| grupo                | grupo\_id        | (grupo\_code, curso_id, periodo_id)                              | periodo\_id → periodo; curso\_id → curso | grupo\_code, periodo\_id, curso\_id | CHECK capacidad                             |
 | profesor\_asignacion | asignacion\_id   | (grupo\_id, profesor\_id) *(+ opc. rol)* | grupo → grupo; profesor → profesor       | grupo\_id, profesor\_id, rol        | Ver reglas de unicidad                      |
 | matricula            | matricula\_id    | (estudiante\_id, grupo\_id)              | estudiante → estudiante; grupo → grupo   | estudiante\_id, grupo\_id           | Evitar duplicidad                           |
 | calificacion         | calificacion\_id | (matricula\_id)                          | matricula → matricula                    | matricula\_id, nota                 | 1 nota por matrícula (o definir componente) |
@@ -74,16 +75,16 @@
 ## Constraints posibles
 | Tabla                | Constraint          | Tipo   | Columnas/Referencia            | Severidad | Estado | Comentario                         |
 | -------------------- | ------------------- | ------ | ------------------------------ | --------- | ------ | ---------------------------------- |
-| periodo              | uq\_periodo\_bk     | UNIQUE | periodo\_code                  | Bloq.     | Plan   | –                                  |
-| departamento         | uq\_depto\_bk       | UNIQUE | dept\_code                     | Bloq.     | Plan   | –                                  |
-| carrera              | uq\_carrera\_bk     | UNIQUE | carr\_code                     | Bloq.     | Plan   | –                                  |
-| curso                | uq\_curso\_bk       | UNIQUE | curso\_code                    | Bloq.     | Plan   | –                                  |
-| profesor             | uq\_profesor\_bk    | UNIQUE | profesor\_dni                  | Bloq.     | Plan   | –                                  |
-| estudiante           | uq\_estud\_bk       | UNIQUE | estudiante\_dni                | Bloq.     | Plan   | –                                  |
-| grupo                | uq\_grupo\_bk       | UNIQUE | grupo\_code                    | Bloq.     | Plan   | –                                  |
-| profesor\_asignacion | uq\_asig\_prof      | UNIQUE | (grupo\_id, profesor\_id)      | Bloq.     | Plan   | + opc. **UNIQUE(grupo\_id, rol)**  |
-| matricula            | uq\_matricula\_bk   | UNIQUE | (estudiante\_id, grupo\_id)    | Bloq.     | Plan   | –                                  |
-| calificacion         | uq\_calif\_bk       | UNIQUE | (matricula\_id)                | Bloq.     | Plan   | Si 1 nota/matrícula                |
+| periodo              | uq\_periodo\_bk     | UNIQUE | periodo\_code                  | Bloq.     | Hecho   | –                                  |
+| departamento         | uq\_depto\_bk       | UNIQUE | dept\_code                     | Bloq.     | Hecho   | –                                  |
+| carrera              | uq\_carrera\_bk     | UNIQUE | carr\_code                     | Bloq.     | Hecho   | –                                  |
+| curso                | uq\_curso\_bk       | UNIQUE | curso\_code                    | Bloq.     | Hecho   | –                                  |
+| profesor             | uq\_profesor\_bk    | UNIQUE | profesor\_dni                  | Bloq.     | Hecho   | –                                  |
+| estudiante           | uq\_estud\_bk       | UNIQUE | estudiante\_dni                | Bloq.     | Hecho   | –                                  |
+| grupo                | uq\_grupo_periodo_curso       | UNIQUE | (grupo\_code, curso_id, periodo_id)                    | Bloq.     | Hecho   | –                                  |
+| profesor\_asignacion | uq\_asignacion\_grupo      | UNIQUE | (grupo\_id, profesor\_id)      | Bloq.     | Hecho   | + opc. **UNIQUE(grupo\_id, rol)**  |
+| matricula            | uq\_matricula\_estudiante\_grupo   | UNIQUE | (estudiante\_id, grupo\_id)    | Bloq.     | Hecho   | –                                  |
+| calificacion         | uq\_calif\_bk       | UNIQUE | (matricula\_id)                | Bloq.     | Hecho   | Si 1 nota/matrícula                |
 | curso                | ck\_curso\_creditos | CHECK  | creditos > 0                   | (W/B)     | Plan   | Según negocio                      |
 | grupo                | ck\_grupo\_cap      | CHECK  | grupo\_cap >= 0                | (W/B)     | Plan   | –                                  |
 | periodo              | ck\_periodo\_fechas | CHECK  | fecha\_inicial <= fecha\_final | (W/B)     | Plan   | –                                  |
@@ -104,3 +105,61 @@
 | matricula            | idx\_mat\_grupo     | Join por grupo                                 |
 | calificacion         | idx\_calif\_mat     | Join por matrícula                             |
 | **(KPI)**            | compuesto a definir | Soporte a VIEW/MV (se afina con consulta real) |
+
+## Matriz de decisión por FK
+| Tabla hija          | Columna (FK)  | Tabla padre  | ON DELETE | ON UPDATE | Estado | Justificación                           |
+| ------------------- | ------------- | ------------ | --------- | --------- | ------ | --------------------------------------- |
+| carrera             | dept_id       | departamento | RESTRICT  | NO ACTION | —      | Catálogo con uso no se borra            |
+| curso               | dept_id       | departamento | RESTRICT  | NO ACTION | —      | Evitar cursos huérfanos                 |
+| estudiante          | carr_id       | carrera      | RESTRICT  | NO ACTION | —      | Estudiante requiere carrera válida      |
+| grupo               | periodo_id    | periodo      | RESTRICT  | NO ACTION | —      | No eliminar periodos con grupos         |
+| grupo               | curso_id      | curso        | RESTRICT  | NO ACTION | —      | Grupo depende del curso                 |
+| profesor_asignacion | grupo_id      | grupo        | CASCADE   | NO ACTION | —      | Asignaciones dependen del grupo         |
+| profesor_asignacion | profesor_id   | profesor     | RESTRICT  | NO ACTION | —      | Evitar borrar profesor con asignaciones |
+| matricula           | estudiante_id | estudiante   | RESTRICT  | NO ACTION | —      | Protege histórico de matrículas         |
+| matricula           | grupo_id      | grupo        | RESTRICT  | NO ACTION | —      | Primero gestionar matrículas            |
+| calificacion        | matricula_id  | matricula    | CASCADE   | NO ACTION | —      | Nota sin matrícula no tiene sentido     |
+
+## CHECKS VALIDADAS (D2)
+
+| Tabla        | Constraint                   | Regla                             | Severidad | Estado | Comentario          |
+| ------------ | ---------------------------- | --------------------------------- | --------- | ------ | ------------------- |
+| calificacion | ck_calificacion_nota         | `nota BETWEEN 0 AND 20`           | **Bloq.** |        | `nota` NOT NULL   |
+| curso        | ck_creditos_no_0             | `creditos > 0`                    | Warn/Bloq |        | Política de negocio |
+| grupo        | ck_grupo_cap                 | `grupo_cap >= 0`                  | Warn      |        | –                   |
+| periodo      | ck_fecha_fin_mayor_fecha_ini | `fecha_inicial < fecha_final` | Warn/Bloq |        | Decide `<`   |
+
+
+## Indices de las FKs (Seguimiento de las vistas)
+
+| Tabla               | Índice          | Objetivo                   | Estado |
+| ------------------- | --------------- | -------------------------- | ------ |
+| carrera             | (dept_id)       | Joins con departamento     |        |
+| curso               | (dept_id)       | Joins con departamento     |        |
+| estudiante          | (carr_id)       | Joins con carrera          |        |
+| grupo               | (periodo_id)    | Filtro por periodo         |        |
+| grupo               | (curso_id)      | Filtro por curso           |        |
+| profesor_asignacion | (grupo_id)      | Join con grupo             |        |
+| profesor_asignacion | (profesor_id)   | Filtro por profesor        |        |
+| matricula           | (estudiante_id) | Filtro/join por estudiante |        |
+| matricula           | (grupo_id)      | Join con grupo             |        |
+| calificacion        | (matricula_id)  | Join con matrícula         |        |
+
+## KPI Elegido (Carga Docente)
+| KPI           | Consulta objetivo                        | Tabla | Índice                 | Justificación                                                                               | Estado |
+| ------------- | ---------------------------------------- | ----- | ---------------------- | ------------------------------------------------------------------------------------------- | ------ |
+| Carga Docente | Top profesores por alumnos en un periodo | grupo | (curso_id, periodo_id) | Acelera filtros combinados en `grupo` antes de unir con `matricula` y `profesor_asignacion` |        |
+
+
+## KPI de apoyo y variables de apoyo
+| Concepto              | Definición                                    | Decisión           |
+| --------------------- | --------------------------------------------- | ------------------ |
+| alumnos_total         | suma de matrículas en grupos del profesor     | **No DISTINCT**    |
+| alumnos_únicos        | estudiantes únicos del profesor en el periodo | Métrica secundaria |
+| grupos_total          | count(distinct grupo_id)                      | –                  |
+| tasa_ocupación_global | sum(matriculados)/sum(capacidad)              | **Principal**      |
+| promedio_ocupación    | avg(matriculados/capacidad por grupo)         | Complementaria     |
+| grupos_a_tope         | count(grupo con matriculados >= capacidad)    | –                  |
+| cortes                | por carrera, curso, departamento              | Sí                 |
+| filtros mínimos       | periodo (obligatorio)                         | Sí                 |
+| roles                 | incluir TITULAR/AUX (o catálogo elegido)      | Decide y documenta |

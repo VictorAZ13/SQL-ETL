@@ -8,7 +8,7 @@
 -- [SECTION] PROCEDURE/FUNCTION: <etl_demo.fn_normaliza_nota / etl_demo.sp_cargar_estudiantes >
 -- PRE: constraints válidas; staging listo
 -- POST: logs registrados; salidas en /exports (D2/D3)
--- DEPENDE DE: <tablas/otras rutinas>
+-- DEPENDE DE: <constraints and quality checks>
 -- SOURCE: sql/others/query_dia9_2.sql (líneas X–Y)
 -- SQL original (copiado sin cambios) ↓↓↓
 -- ...
