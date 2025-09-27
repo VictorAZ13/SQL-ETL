@@ -5,92 +5,286 @@
 -- IDEMPOTENCIA: Cada etapa debe ser reentrante; controlar por claves naturales/run_id.
 -- RUN_ORDER: 40
 
--- [SECTION] PROCEDURE/FUNCTION: <etl_demo.fn_normaliza_nota / etl_demo.sp_cargar_estudiantes >
--- PRE: constraints válidas; staging listo
--- POST: logs registrados; salidas en /exports (D2/D3)
--- DEPENDE DE: <constraints and quality checks>
--- SOURCE: sql/others/query_dia9_2.sql (líneas X–Y)
--- SQL original (copiado sin cambios) ↓↓↓
--- ...
+-- Quitar duplicados
+-- PERIODO  (BK: periodo_code)
+create or replace view stg.vw_stg_periodo_dedup as
+with r as (
+  select p.*,
+         row_number() over (
+           partition by util.fn_normal_valores(p.periodo_code) --BK
+           order by p.load_ts desc nulls last,
+                    p.source_row desc nulls last,
+                    p.extract_ts desc nulls last,
+                    coalesce(p.source_file,'')
+         ) rn
+  from stg.stg_periodo p
+  where not p.is_quarantined
+)
+select * from r where rn = 1;
 
-CREATE OR REPLACE FUNCTION etl_demo.fn_normaliza_nota(n numeric)
-RETURNS numeric 
-LANGUAGE plpgsql AS $$
-BEGIN
-    IF n IS NULL THEN
-        RETURN NULL;
-    END IF;
-    RETURN GREATEST(0,LEAST(1,n/20.0));
-END $$;
+-- DEPARTAMENTO  (BK: dept_code)
+create or replace view stg.vw_stg_departamento_dedup as
+with r as (
+  select d.*,
+         row_number() over (
+           partition by util.fn_normal_valores(d.dept_code)
+           order by d.load_ts desc nulls last,
+                    d.source_row desc nulls last,
+                    d.extract_ts desc nulls last,
+                    coalesce(d.source_file,'')
+         ) rn
+  from stg.stg_departamento d
+  where not d.is_quarantined
+)
+select * from r where rn = 1;
 
---PROCEDIMIENTO DE INSERCION
-CREATE OR REPLACE PROCEDURE etl_demo.sp_cargar_estudiantes(truncate_staging boolean DEFAULT false)
-LANGUAGE plpgsql
-AS $$
-DECLARE 
-    v_run uuid := gen_random_uuid();
-    v_upsert int := 0;
-BEGIN
-    WITH cleaned AS(
-        SELECT
-            trim(id_text) AS id_text,
-            trim(dni) AS dni,
-            initcap(trim(nombre)) AS nombre,
-            initcap(trim(apellido)) AS apellido,
-            upper(trim(genero)) AS genero,
-            curso_id,
-            CASE WHEN nota IS NULL THEN NULL
-                WHEN nota < 0 THEN 0
-                ELSE nota END AS nota,
-            etl_demo.fn_normaliza_nota(nota) AS nota_1
-        FROM etl_demo.staging_estudiantes
-    ),
-    filtered AS(
-        SELECT *
-        FROM cleaned 
-        WHERE dni IS NOT NULL 
-            AND coalesce(length(apellido),0) > 0
-    )
-    INSERT INTO etl_demo.demo_estudiantes(dni,nombre,apellido,genero,curso_id,nota,nota_1,updated_at)
-    SELECT
-        f.dni,
-        f.nombre,
-        f.apellido,
-        CASE WHEN f.genero IN ('M','F') THEN f.genero ELSE NULL END,
-        f.curso_id,
-        LEAST(20,COALESCE(f.nota,0))::numeric(5,2),
-        f.nota_1,
-        now()
-    FROM filtered f 
-    ON CONFLICT (dni) DO UPDATE 
-        SET nombre = EXCLUDED.nombre,
-            apellido  = EXCLUDED.apellido,
-            genero    = EXCLUDED.genero,
-            curso_id  = EXCLUDED.curso_id,
-            nota      = EXCLUDED.nota,
-            nota_1    = EXCLUDED.nota_1,
-            updated_at= now();
-    GET DIAGNOSTICS v_upsert  = ROW_COUNT;
+-- CARRERA  (BK: carr_code)
+create or replace view stg.vw_stg_carrera_dedup as
+with r as (
+  select c.*,
+         row_number() over (
+           partition by util.fn_normal_valores(c.carr_code)
+           order by c.load_ts desc nulls last,
+                    c.source_row desc nulls last,
+                    c.extract_ts desc nulls last,
+                    coalesce(c.source_file,'')
+         ) rn
+  from stg.stg_carrera c
+  where not c.is_quarantined
+)
+select * from r where rn = 1;
 
-    INSERT INTO etl_demo.etl_logs(run_id,tabla,accion,filas_afectadas,status,msg)
-    VALUES (v_run,'demo_estudiantes','upsert',v_upsert,'ok','carga staging-destino con limpieza basica');
-    IF truncate_staging THEN
-        TRUNCATE etl_demo.staging_estudiantes;
-        INSERT INTO etl_demo.etl_logs(run_id,tabla,accion,filas_afectadas,status,msg)
-        VALUES (v_run,'staging_estudiantes','truncate',0,'ok','TRUNCATE staging');
-    END IF;
+-- CURSO  (BK: curso_code)
+create or replace view stg.vw_stg_curso_dedup as
+with r as (
+  select c.*,
+         row_number() over (
+           partition by util.fn_normal_valores(c.curso_code)
+           order by c.load_ts desc nulls last,
+                    c.source_row desc nulls last,
+                    c.extract_ts desc nulls last,
+                    coalesce(c.source_file,'')
+         ) rn
+  from stg.stg_curso c
+  where not c.is_quarantined
+)
+select * from r where rn = 1;
 
-    EXCEPTION WHEN OTHERS THEN
-    INSERT INTO etl_demo.etl_logs(run_id,tabla,accion,filas_afectadas,status,msg)
-    VALUES (v_run,'demo_estudiantes','upsert',0,'failed',SQLERRM);
-    RAISE;
-END$$;
+-- PROFESOR  (BK: profesor_dni)
+create or replace view stg.vw_stg_profesor_dedup as
+with r as (
+  select p.*,
+         row_number() over (
+           partition by util.fn_normal_valores(p.profesor_dni)
+           order by p.load_ts desc nulls last,
+                    p.source_row desc nulls last,
+                    p.extract_ts desc nulls last,
+                    coalesce(p.source_file,'')
+         ) rn
+  from stg.stg_profesor p
+  where not p.is_quarantined
+)
+select * from r where rn = 1;
 
+-- ESTUDIANTE  (BK: estudiante_dni)
+create or replace view stg.vw_stg_estudiante_dedup as
+with r as (
+  select e.*,
+         row_number() over (
+           partition by util.fn_normal_valores(e.estudiante_dni)
+           order by e.load_ts desc nulls last,
+                    e.source_row desc nulls last,
+                    e.extract_ts desc nulls last,
+                    coalesce(e.source_file,'')
+         ) rn
+  from stg.stg_estudiante e
+  where not e.is_quarantined
+)
+select * from r where rn = 1;
 
---ejecutar funcion
-CALL etl_demo.sp_cargar_estudiantes(false);
+-- GRUPO  (BK compuesta: grupo_code, curso_code, periodo_code)
+create or replace view stg.vw_stg_grupo_dedup as
+with r as (
+  select g.*,
+         row_number() over (
+           partition by
+             util.fn_normal_valores(g.grupo_code),
+             util.fn_normal_valores(g.curso_code),
+             util.fn_normal_valores(g.periodo_code)
+           order by g.load_ts desc nulls last,
+                    g.source_row desc nulls last,
+                    g.extract_ts desc nulls last,
+                    coalesce(g.source_file,'')
+         ) rn
+  from stg.stg_grupo g
+  where not g.is_quarantined
+)
+select * from r where rn = 1;
 
--- Conteos y verificación
-SELECT COUNT(*) AS destino_filas FROM etl_demo.demo_estudiantes;
-SELECT dni,nombre,apellido,genero,nota,nota_1 FROM etl_demo.demo_estudiantes ORDER BY dni;
-SELECT * FROM etl_demo.etl_logs ORDER BY ts DESC LIMIT 5;
+-- PROFESOR_ASIGNACION  (BK compuesta: grupo_code, profesor_dni)
+create or replace view stg.vw_stg_profesor_asignacion_dedup as
+with r as (
+  select pa.*,
+         row_number() over (
+           partition by
+             util.fn_normal_valores(pa.grupo_code),
+             util.fn_normal_valores(pa.profesor_dni)
+           order by pa.load_ts desc nulls last,
+                    pa.source_row desc nulls last,
+                    pa.extract_ts desc nulls last,
+                    coalesce(pa.source_file,'')
+         ) rn
+  from stg.stg_profesor_asignacion pa
+  where not pa.is_quarantined
+)
+select * from r where rn = 1;
+
+-- MATRICULA  (BK compuesta: estudiante_dni, grupo_code)
+create or replace view stg.vw_stg_matricula_dedup as
+with r as (
+  select m.*,
+         row_number() over (
+           partition by
+             util.fn_normal_valores(m.estudiante_dni),
+             util.fn_normal_valores(m.grupo_code)
+           order by m.load_ts desc nulls last,
+                    m.source_row desc nulls last,
+                    m.extract_ts desc nulls last,
+                    coalesce(m.source_file,'')
+         ) rn
+  from stg.stg_matricula m
+  where not m.is_quarantined
+)
+select * from r where rn = 1;
+
+-- CALIFICACION  (en staging: (estudiante_dni, grupo_code); en 3FN será por matricula_id)
+create or replace view stg.vw_stg_calificacion_dedup as
+with r as (
+  select c.*,
+         row_number() over (
+           partition by
+             util.fn_normal_valores(c.estudiante_dni),
+             util.fn_normal_valores(c.grupo_code)
+           order by c.load_ts desc nulls last,
+                    c.source_row desc nulls last,
+                    c.extract_ts desc nulls last,
+                    coalesce(c.source_file,'')
+         ) rn
+  from stg.stg_calificacion c
+  where not c.is_quarantined
+)
+select * from r where rn = 1;
+
+--UPSERTS
+begin;
+
+-- 1) DIMENSIONES (orden: depto, periodo, carrera, curso, profesor, estudiante)
+
+-- DEPARTAMENTO (BK: dept_code)
+insert into proyecto_etl.departamento (dept_code, dept_name)
+select util.fn_normal_valores(v.dept_code), v.dept_name
+from stg.vw_stg_departamento_dedup v
+on conflict (dept_code) do update
+set dept_name = excluded.dept_name;
+
+-- PERIODO (BK: periodo_code)
+insert into proyecto_etl.periodo (periodo_code, fecha_inicial, fecha_final)
+select util.fn_normal_valores(v.periodo_code), v.fecha_inicial, v.fecha_final
+from stg.vw_stg_periodo_dedup v
+on conflict (periodo_code) do update
+set fecha_inicial = excluded.fecha_inicial,
+    fecha_final   = excluded.fecha_final;
+
+-- CARRERA (BK: carr_code)  FK: dept_id (lookup por dept_code)
+insert into proyecto_etl.carrera (carr_code, carr_name, dept_id)
+select util.fn_normal_valores(v.carr_code)   as carr_code,
+       v.carr_name,
+       d.dept_id
+from stg.vw_stg_carrera_dedup v
+join proyecto_etl.departamento d
+  on d.dept_code = util.fn_normal_valores(v.dept_code)
+on conflict (carr_code) do update
+set carr_name = excluded.carr_name,
+    dept_id   = excluded.dept_id;
+
+-- CURSO (BK: curso_code)  FK: dept_id (lookup por dept_code)
+insert into proyecto_etl.curso (curso_code, curso_name, creditos, dept_id)
+select util.fn_normal_valores(v.curso_code)  as curso_code,
+       v.curso_name,
+       v.creditos,
+       d.dept_id
+from stg.vw_stg_curso_dedup v
+join proyecto_etl.departamento d
+  on d.dept_code = util.fn_normal_valores(v.dept_code)
+on conflict (curso_code) do update
+set curso_name = excluded.curso_name,
+    creditos   = excluded.creditos,
+    dept_id    = excluded.dept_id;
+
+-- PROFESOR (BK: profesor_dni)
+insert into proyecto_etl.profesor (profesor_dni, profesor_name)
+select util.fn_normal_valores(v.profesor_dni), v.profesor_name
+from stg.vw_stg_profesor_dedup v
+on conflict (profesor_dni) do update
+set profesor_name = excluded.profesor_name;
+
+-- ESTUDIANTE (BK: estudiante_dni)  FK: carr_id (lookup por carr_code)
+insert into proyecto_etl.estudiante (estudiante_dni, estudiante_name, carr_id)
+select util.fn_normal_valores(v.estudiante_dni) as estudiante_dni,
+       v.estudiante_name,
+       c.carr_id
+from stg.vw_stg_estudiante_dedup v
+join proyecto_etl.carrera c
+  on c.carr_code = util.fn_normal_valores(v.carr_code)
+-- where v.batch_id = 'TU_BATCH'
+on conflict (estudiante_dni) do update
+set estudiante_name = excluded.estudiante_name,
+    carr_id         = excluded.carr_id;
+
+-- 2) HECHOS (orden: grupo, profesor_asignacion, matricula, calificacion)
+
+-- GRUPO (BK compuesta: grupo_code, curso_id, periodo_id)
+insert into proyecto_etl.grupo (grupo_code, curso_id, periodo_id, grupo_cap)
+select util.fn_normal_valores(v.grupo_code) as grupo_code,
+       cu.curso_id,
+       pe.periodo_id,
+       v.grupo_cap
+from stg.vw_stg_grupo_dedup v
+join proyecto_etl.curso   cu on cu.curso_code   = util.fn_normal_valores(v.curso_code)
+join proyecto_etl.periodo pe on pe.periodo_code = util.fn_normal_valores(v.periodo_code)
+on conflict (grupo_code, curso_id, periodo_id) do update
+set grupo_cap = excluded.grupo_cap;
+
+-- PROFESOR_ASIGNACION (BK compuesta: grupo_id, profesor_id)
+insert into proyecto_etl.profesor_asignacion (grupo_id, profesor_id, rol)
+select g.grupo_id,
+       p.profesor_id,
+       v.rol
+from stg.vw_stg_profesor_asignacion_dedup v
+join proyecto_etl.grupo    g on g.grupo_code    = util.fn_normal_valores(v.grupo_code)
+join proyecto_etl.profesor p on p.profesor_dni  = util.fn_normal_valores(v.profesor_dni)
+on conflict (grupo_id, profesor_id) do update
+set rol = excluded.rol;
+
+-- MATRICULA (BK compuesta: estudiante_id, grupo_id)
+insert into proyecto_etl.matricula (estudiante_id, grupo_id)
+select e.estudiante_id,
+       g.grupo_id
+from stg.vw_stg_matricula_dedup v
+join proyecto_etl.estudiante e on e.estudiante_dni = util.fn_normal_valores(v.estudiante_dni)
+join proyecto_etl.grupo      g on g.grupo_code     = util.fn_normal_valores(v.grupo_code)
+on conflict (estudiante_id, grupo_id) do nothing;
+
+-- CALIFICACION (BK: matricula_id)
+insert into proyecto_etl.calificacion (matricula_id, nota)
+select m.matricula_id,
+       v.nota
+from stg.vw_stg_calificacion_dedup v
+join proyecto_etl.estudiante e on e.estudiante_dni = util.fn_normal_valores(v.estudiante_dni)
+join proyecto_etl.grupo      g on g.grupo_code     = util.fn_normal_valores(v.grupo_code)
+join proyecto_etl.matricula  m on m.estudiante_id = e.estudiante_id
+                              and m.grupo_id      = g.grupo_id
+on conflict (matricula_id) do update
+set nota = excluded.nota;
+
+commit;

@@ -6,39 +6,57 @@
 -- RUN_ORDER: 20
 --TRIGGER: cambio de fecha de actualización
 
--- [GROUP] Auditoría (NO orquestación)
--- PRE: etl_demo.demo_estudiantes existen
--- SOURCE: sql/others/query_dia9_3.sql
--- SQL original ↓↓↓
--- ...
-DROP TRIGGER IF EXISTS trg_set_updated_at ON etl_demo.demo_estudiantes;
-CREATE TRIGGER trg_set_updated_at
-BEFORE UPDATE ON etl_demo.demo_estudiantes
-FOR EACH ROW EXECUTE FUNCTION etl_demo.trg_set_updated_at();
+-- Tablas de auditoria
+-- Resumen por corrida
+create table if not exists proyecto_etl.audit_run(
+  run_id      bigserial primary key,
+  batch_id    text,
+  started_at  timestamptz default now(),
+  finished_at timestamptz,
+  status      text,     -- ok | error
+  notes       text
+);
 
--- [GROUP] updated_at (independiente de auditoría)
--- PRE: columna updated_at existe
--- SOURCE: sql/others/query_dia9_3.sql
--- SQL original ↓↓↓
--- ...
+-- Detalle por tabla/paso
+create table if not exists proyecto_etl.audit_step(
+  step_id      bigserial primary key,
+  run_id       bigint references proyecto_etl.audit_run(run_id),
+  table_name   text,
+  rows_input   int,
+  rows_inserted int,
+  rows_updated  int,
+  rows_skipped  int,
+  started_at   timestamptz default now(),
+  finished_at  timestamptz,
+  duration_ms  int,
+  notes        text
+);
 
-CREATE OR REPLACE FUNCTION etl_demo.trg_set_updated_at()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-    NEW.updated_at := now();
-    RETURN NEW;
-END $$;
+--TRIGGERS
 
---trigger inserción de tabla auditoria (que se modifico)
-CREATE OR REPLACE FUNCTION etl_demo.trg_audit_estudiantes()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  INSERT INTO etl_demo.log_estudiantes(estudiante_id, op, old_row, new_row)
-  VALUES (COALESCE(NEW.estudiantes_id, OLD.estudiantes_id), TG_OP, to_jsonb(OLD), to_jsonb(NEW));
-  RETURN CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN NEW ELSE OLD END;
-END$$;
+-- Función genérica updated_at
+create or replace function util.fn_set_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
 
-DROP TRIGGER IF EXISTS trg_audit_insupd ON etl_demo.demo_estudiantes;
-CREATE TRIGGER trg_audit_insupd
-AFTER INSERT OR UPDATE ON etl_demo.demo_estudiantes
-FOR EACH ROW EXECUTE FUNCTION etl_demo.trg_audit_estudiantes();
+-- Crea el trigger only-where-available (si la tabla tiene updated_at)
+do $$
+declare r record;
+begin
+  for r in
+    select table_schema, table_name
+    from information_schema.columns
+    where table_schema = 'proyecto_etl' and column_name = 'updated_at'
+  loop
+    execute format('drop trigger if exists trg_set_updated_at on %I.%I;', r.table_schema, r.table_name);
+    execute format(
+      'create trigger trg_set_updated_at before update on %I.%I
+         for each row execute function util.fn_set_updated_at();',
+      r.table_schema, r.table_name
+    );
+  end loop;
+end $$;

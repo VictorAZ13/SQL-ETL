@@ -44,7 +44,7 @@ Diagrama sugerido: fuentes (CSV) → staging → sp_cargar_* (UPSERT) → tablas
 - [x] Plantilla `docs/etl_run.md`
 - [x] Encabezados en `sql/*.sql`
 - [x] 1er commit “init scaffolding”
-## Orquestador (app-céntrico) — Contrato
+
 Ver **docs/orchestrator_contract.md**.  
 No-alcance: el orquestador no ejecuta DDL (constraints/triggers/vistas); solo orquesta pre/post checks, llamadas SQL y exporta evidencias.
 
@@ -66,8 +66,35 @@ export DB_URL=postgresql://user:pass@host:port/db
 psql "$DB_URL" -f sql/01_prechecks.sql
 
 
-Próximo: D4 (functions set-based, sp_orquestar_batch, triggers updated_at/audit, seed de prueba).
+**Dia 4** (SQL Orchestrator)
 
+
+- [x] Funciones utilitarias (util.*)
+- [x] Normalización, validación y hashing (inmutables, set-based).
+
+- [x] Vistas de dedup (stg.vw_stg_*_dedup)
+- [x] Aplican row_number() por BK y exponen solo rn=1 (excluye is_quarantined).
+
+- [x] procedimiento.sql
+
+- [x] Marca reglas de cleanup mínimas (dominio).
+
+- [x] Upserts idempotentes con ON CONFLICT.
+
+- [x] Logs en audit_run y audit_step (contadores, duración, estado).
+
+
+## Estructura actual
+### sql/
+  - util_functions.sql
+  - esquema_staging.sql
+  - prechecks.sql
+  - procedimiento.sql        
+  - dedup_views.sql           
+### docs/
+  - etl_run.md                
+  - orchestrator_contract.md  
+  - 
 ## Orquestador (app-céntrico) — Contrato
 Ver **docs/orchestrator_contract.md**.  
 No-alcance: el orquestador no ejecuta DDL (constraints/triggers/vistas); solo orquesta pre/post checks, llamadas SQL y exporta evidencias.
