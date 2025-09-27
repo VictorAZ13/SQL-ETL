@@ -53,8 +53,21 @@ No-alcance: el orquestador no ejecuta DDL (constraints/triggers/vistas); solo or
 - [x] Claves BK compuestas
 - [x] FKs indices y constraints (Acciones referenciales)
 - [x] KPI escogido
-- [ ] 1er commit “init scaffolding”
-- [ ] 
+- [x] 2do commit "Architecture and constraints" 
+  
+**Día 3**
+- [x] Avances + Cómo correr pre-checks
+
+- [x] Agregado a “Avances”: D3 (hoy) – creado stg.* + índices + script 01_prechecks.sql.
+
+- [x] Agregado “Cómo correr”:
+
+export DB_URL=postgresql://user:pass@host:port/db
+psql "$DB_URL" -f sql/01_prechecks.sql
+
+
+Próximo: D4 (functions set-based, sp_orquestar_batch, triggers updated_at/audit, seed de prueba).
+
 ## Orquestador (app-céntrico) — Contrato
 Ver **docs/orchestrator_contract.md**.  
 No-alcance: el orquestador no ejecuta DDL (constraints/triggers/vistas); solo orquesta pre/post checks, llamadas SQL y exporta evidencias.
