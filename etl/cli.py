@@ -67,12 +67,12 @@ def show_audit(
         with conn, conn.cursor() as cur:
             cur.execute("""
                 WITH last AS (
-                  SELECT run_id
+                  SELECT run_id,status
                   FROM proyecto_etl.audit_run
                   ORDER BY started_at DESC
                   LIMIT 1
                 )
-                SELECT s.table_name, s.rows_inserted,s.rows_updated,s.rows_skipped, s.duration_ms
+                SELECT s.table_name,l.status, s.rows_inserted, s.duration_ms
                 FROM proyecto_etl.audit_step s
                 JOIN last l ON s.run_id = l.run_id
                 ORDER BY l.run_id;
@@ -90,9 +90,9 @@ def show_audit(
         table.add_column("Filas", justify="right")
         table.add_column("ms", justify="right")
 
-        for order, name, status, rows_aff, ms in rows:
+        for order, status, rows_insert, ms in rows:
             badge = "[green]OK[/]" if (status or "").upper() == "OK" else "[red]FAIL[/]"
-            table.add_row(str(order), name, badge, str(rows_aff or 0), str(ms or 0))
+            table.add_row(str(order), badge, str(rows_insert or 0), str(ms or 0))
 
         console.print(table)
     except Exception:
