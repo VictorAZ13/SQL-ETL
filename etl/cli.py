@@ -7,7 +7,7 @@ import typer
 from rich.table import Table
 from rich.console import Console
 
-# --- Fallback para ejecutar como script directo (python etl/cli.py ...) ---
+# --- Fallback para ejecutar como script directo
 try:
     from etl.db import get_conn
 except ImportError:
@@ -101,3 +101,4 @@ def show_audit(
 
 if __name__ == "__main__":
     app()
+
