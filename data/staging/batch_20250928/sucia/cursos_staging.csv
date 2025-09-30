@@ -1,0 +1,36 @@
+"curso_code","nombre","creditos","dept_code","batch_id","source_file"
+CUR   1,Curso 1,4,DEPT_ 4,batch_20250928,curso_base
+CUR   2,Curso 2,4,DEPT_ 1,batch_20250928,curso_base
+CUR   3,Curso 3,5,DEPT_ 1,batch_20250928,curso_base
+CUR   4,Curso 4,4,DEPT_ 2,batch_20250928,curso_base
+CUR   5,Curso 5,4,DEPT_ 3,batch_20250928,curso_base
+CUR   6,Curso 6,5,DEPT_ 2,batch_20250928,curso_base
+CUR   7,Curso 7,5,DEPT_ 2,batch_20250928,curso_base
+CUR   8,Curso 8,5,DEPT_ 1,batch_20250928,curso_base
+CUR   9,Curso 9,5,DEPT_ 2,batch_20250928,curso_base
+CUR  10,Curso 10,5,DEPT_ 4,batch_20250928,curso_base
+CUR  11,Curso 11,3,DEPT_ 2,batch_20250928,curso_base
+CUR  12,Curso 12,6,DEPT_ 5,batch_20250928,curso_base
+CUR  13,Curso 13,5,DEPT_ 2,batch_20250928,curso_base
+CUR  14,Curso 14,4,DEPT_ 4,batch_20250928,curso_base
+CUR  15,Curso 15,3,DEPT_ 2,batch_20250928,curso_base
+CUR  16,Curso 16,4,DEPT_ 1,batch_20250928,curso_base
+CUR  17,Curso 17,5,DEPT_ 3,batch_20250928,curso_base
+CUR  18,Curso 18,5,DEPT_ 2,batch_20250928,curso_base
+CUR  19,Curso 19,6,DEPT_ 1,batch_20250928,curso_base
+CUR  20,Curso 20,4,DEPT_ 5,batch_20250928,curso_base
+CUR  21,Curso 21,3,DEPT_ 1,batch_20250928,curso_base
+CUR  22,Curso 22,5,DEPT_ 3,batch_20250928,curso_base
+CUR  23,Curso 23,5,DEPT_ 3,batch_20250928,curso_base
+CUR  24,Curso 24,6,DEPT_ 3,batch_20250928,curso_base
+CUR  25,Curso 25,5,DEPT_ 1,batch_20250928,curso_base
+CUR  26,Curso 26,5,DEPT_ 2,batch_20250928,curso_base
+CUR  27,Curso 27,5,DEPT_ 2,batch_20250928,curso_base
+CUR  28,Curso 28,4,DEPT_ 4,batch_20250928,curso_base
+CUR  29,Curso 29,3,DEPT_ 2,batch_20250928,curso_base
+CUR  30,Curso 30,4,DEPT_ 2,batch_20250928,curso_base
+CUR  12,Curso 12,6,DEPT_ 5,batch_20250928,curso_dup
+CUR  15,Curso 15,3,DEPT_ 2,batch_20250928,curso_dup
+CUR  27,Curso 27,5,DEPT_ 2,batch_20250928,curso_dup
+CUR9999,Curso Fantasma,4,DEPT_XX,batch_20250928,curso_fk_rota
+CUR0000,Curso Cero,0,DEPT_01,batch_20250928,curso_credito_cero

@@ -24,6 +24,7 @@ venv/
 *.log
 *.ini
 *.cfg
+.toml
 # Mantener JSON locales de config ignorados,
 # pero permitir los de docs/perf/
 *.json

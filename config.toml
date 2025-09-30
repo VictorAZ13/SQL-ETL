@@ -1,0 +1,20 @@
+[etl]
+sql_dir = "sql"
+exports_dir = "exports"
+log_dir = "logs"
+staging_root = "data/staging"
+timezone = "America/Lima"
+kpi_format = "csv"
+timeout = 900
+retries = 1
+
+# Overrides opcionales (cárgalos según un ENV si quieres)
+[etl.windows]
+exports_dir = 'C:\Users\USUARIO\Downloads\sql-etl\exports'
+log_dir     = 'C:\Users\USUARIO\Downloads\sql-etl\logs'
+staging_root= 'C:\Users\USUARIO\Downloads\sql-etl\data\staging'
+
+[etl.linux]
+exports_dir = "/home/usuario/sql-etl/exports"
+log_dir     = "/home/usuario/sql-etl/logs"
+staging_root= "/home/usuario/sql-etl/data/staging"
