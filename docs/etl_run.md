@@ -7,7 +7,7 @@
 - Constraints pendientes de VALIDATE: …
 
 ## Brechas
-- …
+- Staging → Orquestación (SP) → KPIs → Snapshot → Variación → Export.
 
 ## Resultados de VALIDATE (D1 - placeholder)
 - `ALTER TABLE … VALIDATE CONSTRAINT …`: pendiente de ejecución (D2)
@@ -21,8 +21,6 @@
 | notas_fuera_rango | warning | 0 | - | pendiente |
 | delta_staging_vs_destino | bloqueante | 0 | - | pendiente |
 
-## Evidencias del run
-- (D1: capturas/listados de estructura, encabezados SQL)
 
 ## Bitácora (D1)
 - Logros:

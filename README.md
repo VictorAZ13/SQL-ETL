@@ -112,6 +112,20 @@ D5–D7: orquestación Python (flags --dry-run, --truncate-staging, pre/post-che
 
 ---
 
+## KPIs implementados
+
+- matriculas_total, capacidad_total, fill_rate,
+
+- aprobados_total, tasa_aprobacion, nota_promedio.
+
+## Decisions & Notas
+
+“Delta” se renombró a “variación (var)” para evitar confusión con “Delta Lake”.
+
+El SP no carga staging; el CLI asume staging cargado para batch_id.
+
+ON CONFLICT requiere constraints UNIQUE/PK sobre las BK usadas.
+
 ##  Objetivos de aprendizaje
 - Practicar consultas SQL básicas (SELECT, WHERE, ORDER BY, LIMIT, etc.).
 - Integrar Python con PostgreSQL para construir un pipeline ETL.

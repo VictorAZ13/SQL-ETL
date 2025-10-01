@@ -335,7 +335,7 @@ begin
 
   -- DEPARTAMENTO
   t0 := clock_timestamp();
-  select count(*) into v_in --INTO POR QUE?
+  select count(*) into v_in --INTO ASIGNA EL VALOR A V_IN
     from stg.vw_stg_departamento_dedup v
    where (p_batch is null or v.batch_id = p_batch);
 
@@ -647,3 +647,128 @@ end;
 $$;
 
 
+--PROCEDURE KPI
+CREATE OR REPLACE PROCEDURE proyecto_etl.sp_snapshot_kpis(p_run_id bigint)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_batch text;
+BEGIN
+ 
+  SELECT a.batch_id
+    INTO v_batch
+  FROM proyecto_etl.audit_run a
+  WHERE a.run_id = p_run_id;
+
+  IF v_batch IS NULL THEN
+    RAISE EXCEPTION 'run_id % no existe en audit_run', p_run_id;
+  END IF;
+
+
+  INSERT INTO proyecto_etl.kpi_snapshot (
+    run_id, batch_id, kpi_name, kpi_level,
+    periodo_code, dept_code, curso_code, grupo_code, profesor_dni,
+    kpi_value, tags_json
+  )
+  SELECT
+    p_run_id               AS run_id,
+    v_batch                AS batch_id,
+    k.kpi_name,
+    k.nivel                AS kpi_level,
+    k.periodo_code, k.dept_code, k.curso_code, k.grupo_code, k.profesor_dni,
+    k.kpi_value,
+    '{}'::jsonb
+  FROM proyecto_etl.vw_kpis_academicos_long k
+  ON CONFLICT ON CONSTRAINT uq_kpi_snapshot_key
+  DO UPDATE
+    SET kpi_value = EXCLUDED.kpi_value,
+        tags_json = EXCLUDED.tags_json,
+        created_at = now();
+
+END;
+$$;
+-- CON BATCH ID
+CREATE OR REPLACE PROCEDURE proyecto_etl.sp_snapshot_kpis_by_batch(p_batch text)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_run_id bigint;
+BEGIN
+  SELECT a.run_id
+    INTO v_run_id
+  FROM proyecto_etl.audit_run a
+  WHERE a.batch_id = p_batch
+  ORDER BY a.started_at DESC
+  LIMIT 1;
+
+  IF v_run_id IS NULL THEN
+    RAISE EXCEPTION 'No se encontró run_id para batch_id %', p_batch;
+  END IF;
+
+  CALL proyecto_etl.sp_snapshot_kpis(v_run_id);
+END;
+$$;
+-- Creacion para medir variaciones de KPI de pasados a presentes
+
+CREATE OR REPLACE FUNCTION proyecto_etl.fn_kpi_variacion(
+  p_run_base   bigint,
+  p_run_target bigint,
+  p_level      text   DEFAULT NULL,   -- 'grupo'|'curso'|'depto'|'profesor' o NULL
+  p_periodo    text   DEFAULT NULL
+)
+RETURNS TABLE(
+  kpi_name      text,
+  kpi_level     text,
+  periodo_code  text,
+  dept_code     text,
+  curso_code    text,
+  grupo_code    text,
+  profesor_dni  text,
+  base_value    numeric,
+  target_value  numeric,
+  var_abs       numeric,  -- antes: delta_abs
+  var_pct       numeric   -- antes: delta_pct
+)
+LANGUAGE sql
+AS $$
+  WITH b AS (
+    SELECT *
+    FROM proyecto_etl.kpi_snapshot
+    WHERE run_id = p_run_base
+      AND (p_level   IS NULL OR kpi_level    = p_level)
+      AND (p_periodo IS NULL OR periodo_code = p_periodo)
+  ),
+  t AS (
+    SELECT *
+    FROM proyecto_etl.kpi_snapshot
+    WHERE run_id = p_run_target
+      AND (p_level   IS NULL OR kpi_level    = p_level)
+      AND (p_periodo IS NULL OR periodo_code = p_periodo)
+  )
+  SELECT
+    COALESCE(t.kpi_name,  b.kpi_name),
+    COALESCE(t.kpi_level, b.kpi_level),
+    COALESCE(t.periodo_code,  b.periodo_code),
+    COALESCE(t.dept_code,     b.dept_code),
+    COALESCE(t.curso_code,    b.curso_code),
+    COALESCE(t.grupo_code,    b.grupo_code),
+    COALESCE(t.profesor_dni,  b.profesor_dni),
+    b.kpi_value  AS base_value,
+    t.kpi_value  AS target_value,
+    (t.kpi_value - b.kpi_value)                          AS var_abs,
+    (t.kpi_value - b.kpi_value) / NULLIF(b.kpi_value,0)  AS var_pct
+  FROM b
+  FULL OUTER JOIN t
+    ON t.kpi_name   = b.kpi_name
+   AND t.kpi_level  = b.kpi_level
+   AND (t.periodo_code IS NOT DISTINCT FROM b.periodo_code)
+   AND (t.dept_code    IS NOT DISTINCT FROM b.dept_code)
+   AND (t.curso_code   IS NOT DISTINCT FROM b.curso_code)
+   AND (t.grupo_code   IS NOT DISTINCT FROM b.grupo_code)
+   AND (t.profesor_dni IS NOT DISTINCT FROM b.profesor_dni)
+  WHERE COALESCE(t.kpi_value, b.kpi_value) IS NOT NULL
+  ORDER BY kpi_name, kpi_level,
+           periodo_code NULLS LAST, dept_code NULLS LAST,
+           curso_code NULLS LAST,   grupo_code NULLS LAST,
+           profesor_dni NULLS LAST;
+$$;
