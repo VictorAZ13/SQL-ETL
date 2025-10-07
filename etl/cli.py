@@ -315,6 +315,7 @@ def export_kpis(
         console.print_exception(show_locals=False)
         raise typer.Exit(1)
 
+
 if __name__ == "__main__":
     app()
 
